@@ -2,6 +2,7 @@ import * as fetch from 'isomorphic-fetch';
 import {JSDOM} from 'jsdom';
 import * as path from 'path';
 import SequentialQueue from 'sequential-queue';
+import Zip from './modules/zip';
 
 interface ComicsLink {
     title: string | number;
@@ -94,6 +95,7 @@ export default class Zangsisi {
         if (depth === Path.ROOT) {
             const manga = this.comicsList.find(manga => manga.title === target);
             if (!manga) {
+                this.debug();
                 throw new Error(`operation failed: manga list can't find ${target}`);
             }
             this.updatePath(manga.title);
@@ -101,6 +103,7 @@ export default class Zangsisi {
         } else if (depth === Path.COMICS) {
             const mangaBooks = this.comics.find(manga => manga.title === target);
             if (!mangaBooks) {
+                this.debug();
                 throw new Error(`operation failed: manga books can't find ${target}`);
             }
             this.updatePath(mangaBooks.title);
@@ -175,6 +178,35 @@ export default class Zangsisi {
             return this.instructions.push(() => this._html(merged));
         } catch (ex) {
             console.error(ex);
+        }
+    }
+
+    async download(target) {
+        const level = this.depth();
+        const zip = new Zip();
+
+        if (level !== Path.COMICS_BOOK) {
+            console.error(`check current path ${this.currentPath()}`);
+            throw null;
+        }
+
+        try {
+            const list = await this.ls();
+
+            await Promise.all(list.map(async ({link}) => {
+                try {
+                    const response = await fetch(encodeURI(link));
+                    const buffer = await (response as any).buffer();
+                    zip.add(path.basename(link), buffer);
+                } catch(ex) {
+                    console.error(`fetch error: ${link}`, ex);
+                }
+            }));
+
+            return zip.buffer();
+        } catch(ex) {
+            console.error(ex);
+            throw null;
         }
     }
 }
