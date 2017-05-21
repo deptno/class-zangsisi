@@ -3,12 +3,12 @@ import {JSDOM} from 'jsdom';
 import * as path from 'path';
 import SequentialQueue from 'sequential-queue';
 
-interface MangaLink {
+interface ComicsLink {
     title: string | number;
     link: string;
 }
-type Manga = MangaLink;
-type MapFunc = (value: Element, index?: number, array?: Element[]) => MangaLink;
+type Comics = ComicsLink;
+type MapFunc = (value: Element, index?: number, array?: Element[]) => ComicsLink;
 
 enum Path {
     ROOT,
@@ -17,7 +17,7 @@ enum Path {
 }
 
 export default class Zangsisi {
-    private comicsList: MangaLink[] = [];
+    private comicsList: ComicsLink[] = [];
     private comics;
     private path = '/';
     private instructions = new SequentialQueue();
@@ -38,14 +38,14 @@ export default class Zangsisi {
         }
     }
 
-    private async _getMangaList(): Promise<MangaLink[]> {
+    private async _getMangaList(): Promise<ComicsLink[]> {
         return this._getDomList('http://zangsisi.net', '#manga-list a', element => ({
             title: element.getAttribute('data-title'),
             link : element.getAttribute('href')
         }));
     }
 
-    async _getManga(target: string): Promise<MangaLink[]> {
+    async _getManga(target: string): Promise<ComicsLink[]> {
         const manga = this.comicsList.find(manga => manga.title === target);
         if (!manga) {
             throw new Error(`manga list can't find ${target}`);
@@ -56,7 +56,7 @@ export default class Zangsisi {
         }));
     }
 
-    async _getBooks(target: string): Promise<MangaLink[]> {
+    async _getBooks(target: string): Promise<ComicsLink[]> {
         const mangaBooks = this.comics.find(manga => manga.title === target);
         if (!mangaBooks) {
             throw new Error(`manga books can't find ${target}`);
@@ -110,7 +110,7 @@ export default class Zangsisi {
         }
     }
 
-    private async _ls(): Promise<(MangaLink | Manga)[]> {
+    private async _ls(): Promise<(ComicsLink | Comics)[]> {
         const pathLevel = this.depth();
         // console.log('ls ', this.currentPath(), pathLevel);
 
@@ -135,7 +135,7 @@ export default class Zangsisi {
 </html>`;
     }
 
-    private async _html(manga?: Manga[], template = this.template(), selector = 'body') {
+    private async _html(manga?: Comics[], template = this.template(), selector = 'body') {
         const document: Document = new JSDOM(template).window.document;
         const images = manga || await this._getBooks(this.currentPath());
         const body = JSDOM.fragment(images.map(image => `<p><img src="${image.link}"/></p>`).join('\n'));
@@ -153,7 +153,7 @@ export default class Zangsisi {
             .map(step => this.instructions.push(this._cd.bind(this, step)));
     }
 
-    async ls(): Promise<(MangaLink | Manga)[]> {
+    async ls(): Promise<(ComicsLink | Comics)[]> {
         return this.instructions.push(this._ls.bind(this));
     }
 
@@ -168,7 +168,7 @@ export default class Zangsisi {
         }
         try {
             const result = await Promise.all(books.map(this._getBooks.bind(this)));
-            const merged: MangaLink[] = result.reduce<Manga[]>((ret, curr: MangaLink[]) => {
+            const merged: ComicsLink[] = result.reduce<Comics[]>((ret, curr: ComicsLink[]) => {
                 ret.push(...curr);
                 return ret;
             }, []);

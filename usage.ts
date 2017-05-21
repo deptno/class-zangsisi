@@ -1,7 +1,19 @@
-import Zangsisi from './src/index';
-import Zip from './src/zip';
+import Zangsisi from './index';
 import {basename, join} from 'path';
 import {writeFileSync} from 'fs';
+import * as nodeZip from 'node-zip';
+
+export default class Zip {
+    private zip = new nodeZip();
+    private blob;
+
+    add(filename, buffer) {
+        this.zip.file(filename, buffer);
+    }
+    buffer(): Buffer {
+        return this.blob = this.zip.generate({base64:false,compression:'DEFLATE'});
+    }
+}
 
 enum EList {
     Comics = 1,
