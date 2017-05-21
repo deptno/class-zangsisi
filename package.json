@@ -11,7 +11,7 @@
     "isomorphic-fetch": "^2.2.1",
     "jsdom": "^10.1.0",
     "node-zip": "^1.1.1",
-    "sequential-queue": "^1.0.2",
+    "sequential-queue": "^1.0.3",
     "uuid": "^3.0.1"
   },
   "scripts": {
