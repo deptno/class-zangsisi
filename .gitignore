@@ -2,4 +2,4 @@
 .vscode/
 node_modules/
 **/*.js
-**/*.html
+usage.ts
