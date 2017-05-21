@@ -13,5 +13,12 @@
     "node-zip": "^1.1.1",
     "sequential-queue": "^1.0.2",
     "uuid": "^3.0.1"
+  },
+  "scripts": {
+    "build": "tsc",
+    "postinstall": "npm run build"
+  },
+  "devDependencies": {
+    "typescript": "^2.3.2"
   }
 }
