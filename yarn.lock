@@ -454,9 +454,9 @@ sax@^1.2.1:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.2.tgz#fd8631a23bc7826bef5d871bdb87378c95647828"
 
-sequential-queue@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/sequential-queue/-/sequential-queue-1.0.2.tgz#876592c08a1a47842350fda238e138550749744c"
+sequential-queue@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/sequential-queue/-/sequential-queue-1.0.4.tgz#58b335f3ab9673528d262dbfc953df6ee00d305d"
   dependencies:
     "@types/node" "^7.0.21"
     "@types/uuid" "^2.0.29"
