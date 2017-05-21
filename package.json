@@ -1,6 +1,7 @@
 {
-  "name": "@deptno/class-zangsisi",
-  "version": "0.0.1",
+  "name": "class-zangsisi",
+  "private": true,
+  "version": "0.1.0",
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
