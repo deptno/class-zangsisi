@@ -59,7 +59,7 @@ export default class Zangsisi {
     }
 
     private async _getBooks(target: string): Promise<ComicsLink[]> {
-        const mangaBooks = this.comics[this.currentPath()].find(manga => manga.title === target);
+        const mangaBooks = this.comics[this.getPath(true)].find(manga => manga.title === target);
         if (!mangaBooks) {
             throw new Error(`manga books can't find ${target}`);
         }
@@ -69,13 +69,16 @@ export default class Zangsisi {
         }));
     }
 
-    private currentPath(): string {
-        return this.path.slice(this.path.lastIndexOf('/') + 1);
+    private getPath(dir?: boolean): string {
+        if (dir) {
+            return path.dirname(this.path).slice(1);
+        }
+        return path.basename(this.path);
     }
 
     private updatePath(nextPath): void {
         this.path = nextPath === '/' ? this.path = '/' : path.join(this.path, nextPath);
-        this.debug();
+        // this.debug();
     }
 
     private debug(): void {
@@ -102,7 +105,7 @@ export default class Zangsisi {
             this.updatePath(manga.title);
             await this._ls();
         } else if (depth === Path.COMICS) {
-            const mangaBooks = this.comics[this.currentPath()].find(manga => manga.title === target);
+            const mangaBooks = this.comics[this.getPath()].find(manga => manga.title === target);
             if (!mangaBooks) {
                 this.debug();
                 throw new Error(`operation failed: manga books can't find ${target}`);
@@ -116,7 +119,7 @@ export default class Zangsisi {
 
     private async _ls(): Promise<(ComicsLink | Comics)[]> {
         const pathLevel = this.depth();
-        const currentPath = this.currentPath();
+        const currentPath = this.getPath();
 
         if (pathLevel === Path.ROOT) {
             if (this.comicsList.length === 0) {
@@ -140,17 +143,17 @@ export default class Zangsisi {
         return `<!DOCTYPE html>
 <html lang="ko">
 <head>
-<title>${this.currentPath()}</title>
+<title>${this.getPath()}</title>
 </head>
 <body/>
-<h1>${this.currentPath()}</h1>
+<h1>${this.getPath()}</h1>
 </body>
 </html>`;
     }
 
     private async _html(manga?: Comics[], template = this.template(), selector = 'body') {
         const document: Document = new JSDOM(template).window.document;
-        const images = manga || await this._getBooks(this.currentPath());
+        const images = manga || await this._getBooks(this.getPath());
         const body = JSDOM.fragment(images.map(image => `<p><img src="${image.link}"/></p>`).join('\n'));
         document.querySelector(selector).appendChild(body);
         return document.documentElement.outerHTML;
@@ -196,7 +199,7 @@ export default class Zangsisi {
         const zip = new Zip();
 
         if (level !== Path.COMICS_BOOK) {
-            console.error(`check current path ${this.currentPath()}`);
+            console.error(`check current path ${this.getPath()}`);
             throw null;
         }
 

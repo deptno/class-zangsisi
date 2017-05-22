@@ -76,7 +76,7 @@ async function download(target) {
 !async function() {
     console.log('[list]');
     console.log('[list] 1 depth', await list('너의 이름은'));
-    // console.log('[list] 2 depth', await list('/더 파이팅/더 파이팅 100권'));
+    console.log('[list] 2 depth', await list('/더 파이팅/더 파이팅 100권'));
     // console.log('[download] by comics name');
     // await download('/너의 이름은');
     // console.log('[download] by book');
