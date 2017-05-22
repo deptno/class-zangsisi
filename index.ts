@@ -19,7 +19,8 @@ enum Path {
 
 export default class Zangsisi {
     private comicsList: ComicsLink[] = [];
-    private comics;
+    private comics = {};
+    private books = {};
     private path = '/';
     private instructions = new SequentialQueue();
 
@@ -46,7 +47,7 @@ export default class Zangsisi {
         }));
     }
 
-    async _getManga(target: string): Promise<ComicsLink[]> {
+    private async _getManga(target: string): Promise<ComicsLink[]> {
         const manga = this.comicsList.find(manga => manga.title === target);
         if (!manga) {
             throw new Error(`manga list can't find ${target}`);
@@ -57,8 +58,8 @@ export default class Zangsisi {
         }));
     }
 
-    async _getBooks(target: string): Promise<ComicsLink[]> {
-        const mangaBooks = this.comics.find(manga => manga.title === target);
+    private async _getBooks(target: string): Promise<ComicsLink[]> {
+        const mangaBooks = this.comics[this.currentPath()].find(manga => manga.title === target);
         if (!mangaBooks) {
             throw new Error(`manga books can't find ${target}`);
         }
@@ -68,20 +69,20 @@ export default class Zangsisi {
         }));
     }
 
-    currentPath(): string {
+    private currentPath(): string {
         return this.path.slice(this.path.lastIndexOf('/') + 1);
     }
 
-    updatePath(nextPath): void {
+    private updatePath(nextPath): void {
         this.path = nextPath === '/' ? this.path = '/' : path.join(this.path, nextPath);
         this.debug();
     }
 
-    debug() {
-        // console.log('[debug] path: ' + this.path);
+    private debug(): void {
+        console.log('[debug] path: ' + this.path);
     }
 
-    depth() {
+    private depth(): number {
         return this.path === '/' ? 0 : this.path.match(/\//g).length;
     }
 
@@ -101,7 +102,7 @@ export default class Zangsisi {
             this.updatePath(manga.title);
             await this._ls();
         } else if (depth === Path.COMICS) {
-            const mangaBooks = this.comics.find(manga => manga.title === target);
+            const mangaBooks = this.comics[this.currentPath()].find(manga => manga.title === target);
             if (!mangaBooks) {
                 this.debug();
                 throw new Error(`operation failed: manga books can't find ${target}`);
@@ -115,14 +116,23 @@ export default class Zangsisi {
 
     private async _ls(): Promise<(ComicsLink | Comics)[]> {
         const pathLevel = this.depth();
-        // console.log('ls ', this.currentPath(), pathLevel);
+        const currentPath = this.currentPath();
 
         if (pathLevel === Path.ROOT) {
-            return this.comicsList = await this._getMangaList();
+            if (this.comicsList.length === 0) {
+                this.comicsList = await this._getMangaList();
+            }
+            return this.comicsList;
         } else if (pathLevel === Path.COMICS) {
-            return this.comics = await this._getManga(this.currentPath());
+            if (!this.comics[currentPath]) {
+                this.comics[currentPath] = await this._getManga(currentPath);
+            }
+            return this.comics[currentPath];
         } else if (pathLevel === Path.COMICS_BOOK) {
-            return this._getBooks(this.currentPath());
+            if (!this.books[currentPath]) {
+                this.books[currentPath] = this._getBooks(currentPath);
+            }
+            return this.books[currentPath];
         }
     }
 
@@ -181,7 +191,7 @@ export default class Zangsisi {
         }
     }
 
-    async download(target) {
+    async download() {
         const level = this.depth();
         const zip = new Zip();
 
