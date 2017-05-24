@@ -214,7 +214,7 @@ class Zangsisi {
                 const list = yield this.ls();
                 const bytes = yield new Promise(resolve => {
                     const child = child_process_1.spawn('node', [
-                        `${__dirname}/node_modules/zip-remote-resources/index.js`,
+                        `${__dirname}/../../node_modules/zip-remote-resources/index.js`,
                         filename,
                         JSON.stringify(list.map(r => r.link))
                     ], { stdio: [0, 'pipe', process.stderr] });

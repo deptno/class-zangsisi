@@ -206,7 +206,7 @@ export default class Zangsisi {
             const list = await this.ls();
             const bytes = await new Promise(resolve => {
                 const child = spawn('node', [
-                        `${__dirname}/node_modules/zip-remote-resources/index.js`,
+                        `${__dirname}/../../node_modules/zip-remote-resources/index.js`,
                         filename,
                         JSON.stringify(list.map(r => r.link))
                     ],
