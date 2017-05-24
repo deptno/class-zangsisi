@@ -2,7 +2,7 @@ import * as fetch from 'isomorphic-fetch';
 import {JSDOM} from 'jsdom';
 import * as path from 'path';
 import SequentialQueue from 'sequential-queue';
-import Zip from './modules/zip';
+import {spawn} from 'child_process';
 
 interface ComicsLink {
     title: string | number;
@@ -194,9 +194,8 @@ export default class Zangsisi {
         }
     }
 
-    async download() {
+    async download(filename) {
         const level = this.depth();
-        const zip = new Zip();
 
         if (level !== Path.COMICS_BOOK) {
             console.error(`check current path ${this.getPath()}`);
@@ -205,18 +204,17 @@ export default class Zangsisi {
 
         try {
             const list = await this.ls();
-
-            await Promise.all(list.map(async ({link}) => {
-                try {
-                    const response = await fetch(encodeURI(link));
-                    const buffer = await (response as any).buffer();
-                    zip.add(path.basename(link), buffer);
-                } catch(ex) {
-                    console.error(`fetch error: ${link}`, ex);
-                }
-            }));
-
-            return zip.buffer();
+            const bytes = await new Promise(resolve => {
+                const child = spawn('node', [
+                        `${__dirname}/node_modules/zip-remote-resources/index.js`,
+                        filename,
+                        JSON.stringify(list.map(r => r.link))
+                    ],
+                    {stdio: [0,'pipe',process.stderr]}
+                );
+                child.stdout.on('data', x => resolve(parseInt(x.toString())));
+            });
+            return bytes;
         } catch(ex) {
             console.error(ex);
             throw null;
