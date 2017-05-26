@@ -203,7 +203,7 @@ class Zangsisi {
             }
         });
     }
-    download(filename) {
+    download(filename, onDownloadEnd) {
         return __awaiter(this, void 0, void 0, function* () {
             const level = this.depth();
             if (level !== Path.COMICS_BOOK) {
@@ -212,15 +212,16 @@ class Zangsisi {
             }
             try {
                 const list = yield this.ls();
-                const bytes = yield new Promise(resolve => {
+                return new Promise(resolve => {
+                    resolve();
                     const child = child_process_1.spawn('node', [
                         `${__dirname}/../../node_modules/zip-remote-resources/index.js`,
                         filename,
                         JSON.stringify(list.map(r => r.link))
                     ], { stdio: [0, 'pipe', process.stderr] });
-                    child.stdout.on('data', x => resolve(parseInt(x.toString())));
+                    child.stdout.on('data', bytes => onDownloadEnd && onDownloadEnd(parseInt(bytes.toString())));
+                    child.stdout.on('error', error => onDownloadEnd && onDownloadEnd(0));
                 });
-                return bytes;
             }
             catch (ex) {
                 console.error(ex);

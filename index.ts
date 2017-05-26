@@ -194,7 +194,7 @@ export default class Zangsisi {
         }
     }
 
-    async download(filename) {
+    async download(filename, onDownloadEnd?: (bytes: number) => void) {
         const level = this.depth();
 
         if (level !== Path.COMICS_BOOK) {
@@ -204,7 +204,8 @@ export default class Zangsisi {
 
         try {
             const list = await this.ls();
-            const bytes = await new Promise(resolve => {
+            return new Promise(resolve => {
+                resolve();
                 const child = spawn('node', [
                         `${__dirname}/../../node_modules/zip-remote-resources/index.js`,
                         filename,
@@ -212,9 +213,9 @@ export default class Zangsisi {
                     ],
                     {stdio: [0,'pipe',process.stderr]}
                 );
-                child.stdout.on('data', x => resolve(parseInt(x.toString())));
+                child.stdout.on('data', bytes => onDownloadEnd && onDownloadEnd(parseInt(bytes.toString())));
+                child.stdout.on('error', error =>onDownloadEnd && onDownloadEnd(0));
             });
-            return bytes;
         } catch(ex) {
             console.error(ex);
             throw null;

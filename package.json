@@ -14,5 +14,10 @@
     "uuid": "^3.0.1",
     "zip-remote-resources": "^0.2.1"
   },
-  "devDependencies": {}
+  "scripts": {
+    "build:dev": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^2.3.3"
+  }
 }
